@@ -61,13 +61,13 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 setup(
-    name='pysa',
+    name='pypisa',
     version='0.1.0',
     author='PISA\'s authors',
     author_email='',
     description='A Python interface to the PISA IR engine',
     long_description='',
-    ext_modules=[CMakeExtension('pysa')],
+    ext_modules=[CMakeExtension('pypisa')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )

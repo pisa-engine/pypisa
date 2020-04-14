@@ -28,6 +28,6 @@ void parse(std::string const &fwd, std::string const &format,
       pisa::parse_plaintext_content, batch_size, THREADS);
 }
 
-PYBIND11_MODULE(pysa, m) {
+PYBIND11_MODULE(pypisa, m) {
   m.def("parse", &parse);
 }
