@@ -1,6 +1,6 @@
 [submodule "pybind11"]
-	path = pybind11
+	path = external/pybind11
 	url = https://github.com/pybind/pybind11.git
 [submodule "pisa"]
-	path = pisa
+	path = external/pisa
 	url = https://github.com/pisa-engine/pisa.git
