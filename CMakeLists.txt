@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory(external)
 
 add_library(pypisa MODULE src/binder.cpp)
-target_link_libraries(pypisa PRIVATE pybind11::module pisa)
+target_link_libraries(pypisa PUBLIC pybind11::module pisa)
 set_target_properties(pypisa PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
                                          SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
