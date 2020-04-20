@@ -14,11 +14,15 @@ using pisa::Forward_Index_Builder;
 
 static std::size_t const THREADS = 1;
 
-void _index(std::string const& index_dir, std::string const& format, std::size_t batch_size = 10'000)
+void _index(
+    std::istream& is,
+    std::string const& index_dir,
+    std::string const& format,
+    std::size_t batch_size = 10'000)
 {
     pisa::Forward_Index_Builder fwd_builder;
     fwd_builder.build(
-        std::cin,
+        is,
         fmt::format("{}/fwd", index_dir),
         [](std::istream& in) -> std::optional<Document_Record> {
             std::string line;
