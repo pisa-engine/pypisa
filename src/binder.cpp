@@ -3,7 +3,9 @@
 #include <fmt/format.h>
 #include <forward_index_builder.hpp>
 #include <invert.hpp>
+#include <scorer/scorer.hpp>
 #include <pybind11/pybind11.h>
+#include <query/term_processor.hpp>
 #include <wand_data.hpp>
 #include <wand_utils.hpp>
 
@@ -20,6 +22,7 @@ void _index(
     std::string const& format,
     std::size_t batch_size = 10'000)
 {
+    std::optional<std::string> stemmer = std::nullopt;
     pisa::Forward_Index_Builder fwd_builder;
     fwd_builder.build(
         is,
@@ -31,10 +34,7 @@ void _index(
             }
             return std::nullopt;
         },
-        [](std::string&& term) -> std::string {
-            boost::algorithm::to_lower(term);
-            return std::move(term);
-        },
+        pisa::term_processor_builder(stemmer),
         pisa::parse_plaintext_content,
         batch_size,
         THREADS);
@@ -52,15 +52,16 @@ void _index(
 void _compress(
     std::string const& index_dir,
     std::string const& index_encoding,
-    std::string const& scorer_name,
+    std::string scorer_name,
     size_t block_size,
     bool quantize)
 {
+    auto scorer = ScorerParams(scorer_name);
     pisa::create_wand_data(
         fmt::format("{}/bmw", index_dir),
         fmt::format("{}/inv", index_dir),
         pisa::FixedBlock(block_size),
-        scorer_name,
+        scorer,
         false,
         false,
         quantize,
@@ -70,7 +71,7 @@ void _compress(
         fmt::format("{}/bmw", index_dir),
         index_encoding,
         fmt::format("{}/inv.{}", index_dir, index_encoding),
-        scorer_name,
+        scorer,
         quantize,
         false);
 }
