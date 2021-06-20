@@ -3,9 +3,10 @@
 #include <fmt/format.h>
 #include <forward_index_builder.hpp>
 #include <invert.hpp>
-#include <scorer/scorer.hpp>
+#include <parser.hpp>
 #include <pybind11/pybind11.h>
 #include <query/term_processor.hpp>
+#include <scorer/scorer.hpp>
 #include <wand_data.hpp>
 #include <wand_utils.hpp>
 
@@ -76,11 +77,31 @@ void _compress(
         false);
 }
 
-void _search() {}
+void _search(
+    std::string const& index_path,
+    std::string const& encoding,
+    std::vector<std::string> const& queries,
+    std::string const& algorithm,
+    std::size_t k,
+    std::optional<std::string> const& wand_data_path = std::nullopt,
+    bool wand_data_compessed = false,
+    std::optional<std::string> const& scorer = std::nullopt)
+{}
 
 PYBIND11_MODULE(pypisa, m)
 {
     m.def("index", &_index);
     m.def("compress", &_compress);
-    m.def("search", &_search);
+    m.def(
+        "search",
+        &_search,
+        "Executes queries.",
+        py::arg("index_path"),
+        py::arg("encoding"),
+        py::arg("queries"),
+        py::arg("algorithm"),
+        py::arg("k"),
+        py::arg("wand_data_path") = std::nullopt,
+        py::arg("wand_data_compessed") = std::nullopt,
+        py::arg("scorer") = std::nullopt);
 }
