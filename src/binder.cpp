@@ -5,10 +5,14 @@
 #include <invert.hpp>
 #include <parser.hpp>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <query/term_processor.hpp>
 #include <scorer/scorer.hpp>
 #include <wand_data.hpp>
 #include <wand_utils.hpp>
+
+#include <query_engine.hpp>
+#include <simdbp_query_engine.hpp>
 
 namespace py = pybind11;
 
@@ -18,11 +22,12 @@ using pisa::Forward_Index_Builder;
 static std::size_t const THREADS = 1;
 
 void _index(
-    std::istream& is,
+    std::string const& input_file,
     std::string const& index_dir,
     std::string const& format,
     std::size_t batch_size = 10'000)
 {
+    std::ifstream is(input_file);
     std::optional<std::string> stemmer = std::nullopt;
     pisa::Forward_Index_Builder fwd_builder;
     fwd_builder.build(
@@ -38,16 +43,16 @@ void _index(
         pisa::term_processor_builder(stemmer),
         pisa::parse_plaintext_content,
         batch_size,
-        THREADS);
-    auto term_lexicon_file = fmt::format("{}/termlex", index_dir);
+        THREADS + 1);
+    auto term_lexicon_file = fmt::format("{}/fwd.termlex", index_dir);
     mio::mmap_source mfile(term_lexicon_file.c_str());
     auto lexicon = pisa::Payload_Vector<>::from(mfile);
     pisa::invert::invert_forward_index(
         fmt::format("{}/fwd", index_dir),
         fmt::format("{}/inv", index_dir),
-        lexicon.size(),
         batch_size,
-        THREADS);
+        THREADS,
+        lexicon.size());
 }
 
 void _compress(
@@ -83,10 +88,22 @@ void _search(
     std::vector<std::string> const& queries,
     std::string const& algorithm,
     std::size_t k,
-    std::optional<std::string> const& wand_data_path = std::nullopt,
-    bool wand_data_compessed = false,
-    std::optional<std::string> const& scorer = std::nullopt)
-{}
+    std::optional<std::string> const& wand_data_path,
+    bool wand_data_compessed,
+    std::optional<std::string> const& scorer)
+{
+    if (!scorer) {
+        throw std::invalid_argument("queries without scoring are not currently supported");
+    }
+    if (scorer && !wand_data_path) {
+        throw std::invalid_argument("WAND data file is required for scored queries");
+    }
+    auto engine = pypisa::QueryEngine::load(encoding, index_path, wand_data_path.value());
+    if (!engine) {
+        throw std::invalid_argument("invalid encoding: " + encoding);
+    }
+    auto proc = engine->processor(algorithm, ScorerParams(scorer.value()), k);
+}
 
 PYBIND11_MODULE(pypisa, m)
 {
@@ -101,7 +118,7 @@ PYBIND11_MODULE(pypisa, m)
         py::arg("queries"),
         py::arg("algorithm"),
         py::arg("k"),
-        py::arg("wand_data_path") = std::nullopt,
-        py::arg("wand_data_compessed") = std::nullopt,
-        py::arg("scorer") = std::nullopt);
+        py::arg("wand_data_path"),
+        py::arg("wand_data_compessed"),
+        py::arg("scorer"));
 }
