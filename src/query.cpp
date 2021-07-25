@@ -1,16 +1,16 @@
 #include <memory>
 
-#include "query_processor.hpp"
+#include "query_engine.hpp"
 
-// #include <tbb/global_control.h>
-// #include <tbb/parallel_for.h>
+#include <tbb/global_control.h>
+#include <tbb/parallel_for.h>
 
-#include "app.hpp"
+// #include "app.hpp"
 
 using namespace pisa;
 
 void evaluate_queries(
-    ProcFunc const& query_fun,
+    pypisa::QueryProcessor const& query_fun,
     const std::vector<Query>& queries,
     const std::optional<std::string>& thresholds_filename,
     std::string const& documents_filename,
@@ -56,7 +56,7 @@ auto query()
 {
     // tbb::global_control control(tbb::global_control::max_allowed_parallelism, app.threads() + 1);
     // spdlog::info("Number of worker threads: {}", app.threads());
-    auto query_processor = QueryProcessor::load("", "", "");
-    auto query_func = (*query_processor)("wand", ScorerParams("bm25"), 10);
+    auto engine = pypisa::QueryEngine::load("", "", "");
+    auto query_func = engine->processor("wand", ScorerParams("bm25"), 10);
     evaluate_queries(query_func, {}, "", "", "", "");
 }

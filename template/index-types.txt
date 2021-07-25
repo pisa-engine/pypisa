@@ -1,0 +1,14 @@
+ef EliasFano
+single Single
+pefuniform PartitionedEliasFanoUniform
+pefopt PartitionedEliasFanoOpt
+block_optpfor OptPFor
+block_varintg8iu VarintG8IU
+block_streamvbyte StreamVByte
+block_maskedvbyte MaskedVByte
+block_varintgb VarintGB
+block_interpolative Interpolative
+block_qmx Qmx
+block_simple8b Simple8B
+block_simple16 Simple16
+block_simdbp SimdBp

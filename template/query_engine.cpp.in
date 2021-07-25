@@ -1,0 +1,15 @@
+#include "query_engine.hpp"
+
+@includes@
+
+namespace pypisa {
+
+[[nodiscard]] auto QueryEngine::load(
+    std::string_view encoding, std::string const& index_path, std::string const& wand_data_path)
+    -> std::unique_ptr<QueryEngine>
+{
+@body@
+    return nullptr;
+}
+
+}  // namespace pypisa

@@ -1,4 +1,3 @@
-#include <boost/algorithm/string.hpp>
 #include <compress.hpp>
 #include <fmt/format.h>
 #include <forward_index_builder.hpp>
@@ -12,7 +11,6 @@
 #include <wand_utils.hpp>
 
 #include <query_engine.hpp>
-#include <simdbp_query_engine.hpp>
 
 namespace py = pybind11;
 

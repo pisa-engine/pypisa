@@ -9,9 +9,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 add_subdirectory(external)
 
-add_library(pypisa MODULE src/binder.cpp
-    src/query_engine.cpp
-    src/simdbp_query_engine.cpp)
+file(GLOB SOURCE_FILES src/*.cpp)
+add_library(pypisa MODULE ${SOURCE_FILES})
 target_include_directories(pypisa
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(pypisa PRIVATE pybind11::module pisa)

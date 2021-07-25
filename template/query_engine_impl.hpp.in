@@ -10,16 +10,17 @@
 
 namespace pypisa {
 
-class SimdBpQueryEngine: public QueryEngine {
+class @class@QueryEngine: public QueryEngine
+{
   private:
-    pisa::block_simdbp_index m_index;
+    pisa::@index@_index m_index;
     pisa::wand_data<pisa::wand_data_raw> m_wdata;
 
   public:
-    SimdBpQueryEngine(std::string const& path, std::string const& wand_data_filename);
+    @class@QueryEngine(std::string const& path, std::string const& wand_data_filename);
     auto processor(std::string_view algorithm, ScorerParams scorer_params, std::size_t k)
-        -> QueryProcessor override;
-    ~SimdBpQueryEngine();
+        ->QueryProcessor override;
+    ~@class@QueryEngine();
 };
 
 }  // namespace pypisa
