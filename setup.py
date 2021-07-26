@@ -61,7 +61,7 @@ class CMakeBuild(build_ext):
             cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
             build_args += ["--", "-j2"]
 
-        cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=clang.cmake", "-DPISA_USE_PIC=ON"]
+        cmake_args += ["-DPISA_USE_PIC=ON"]
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)

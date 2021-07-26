@@ -2,7 +2,9 @@
 #include <fmt/format.h>
 #include <forward_index_builder.hpp>
 #include <invert.hpp>
+#include <io.hpp>
 #include <parser.hpp>
+#include <payload_vector.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <query/term_processor.hpp>
@@ -80,6 +82,43 @@ void _compress(
         false);
 }
 
+void _compress_from_basename(
+    std::string const& index_basename,
+    std::string const& output_basename,
+    std::string const& index_encoding,
+    std::string scorer_name,
+    size_t block_size,
+    bool quantize)
+{
+    auto scorer = ScorerParams(scorer_name);
+    pisa::create_wand_data(
+        fmt::format("{}.bmw", output_basename),
+        fmt::format("{}", index_basename),
+        pisa::FixedBlock(block_size),
+        scorer,
+        false,
+        false,
+        quantize,
+        {});
+    pisa::compress(
+        fmt::format("{}", index_basename),
+        fmt::format("{}.bmw", output_basename),
+        index_encoding,
+        fmt::format("{}.{}.idx", output_basename, index_encoding),
+        scorer,
+        quantize,
+        false);
+}
+
+
+
+void _build_lexicon(std::string const& in_file, std::string const& out_file)
+{
+    std::ifstream ifs(in_file);
+    pisa::encode_payload_vector(std::istream_iterator<pisa::io::Line>(ifs),
+                                std::istream_iterator<pisa::io::Line>()).to_file(out_file);
+} 
+
 void _search(
     std::string const& index_path,
     std::string const& encoding,
@@ -107,6 +146,8 @@ PYBIND11_MODULE(pypisa, m)
 {
     m.def("index", &_index);
     m.def("compress", &_compress);
+    m.def("compress_from_basename", &_compress_from_basename);
+    m.def("build_lexicon", &_build_lexicon);
     m.def(
         "search",
         &_search,
