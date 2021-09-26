@@ -9,10 +9,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 add_subdirectory(external)
 
-add_library(pypisa MODULE src/binder.cpp)
+file(GLOB SOURCE_FILES src/*.cpp)
+add_library(pypisa MODULE ${SOURCE_FILES})
+target_include_directories(pypisa
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
 target_link_libraries(pypisa PRIVATE pybind11::module pisa)
 set_target_properties(pypisa PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}"
                                          SUFFIX "${PYTHON_MODULE_EXTENSION}")
-
-
-
