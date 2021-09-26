@@ -7,6 +7,7 @@
 #include <payload_vector.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <query/queries.hpp>
 #include <query/term_processor.hpp>
 #include <scorer/scorer.hpp>
 #include <wand_data.hpp>
@@ -110,16 +111,15 @@ void _compress_from_basename(
         false);
 }
 
-
-
 void _build_lexicon(std::string const& in_file, std::string const& out_file)
 {
     std::ifstream ifs(in_file);
-    pisa::encode_payload_vector(std::istream_iterator<pisa::io::Line>(ifs),
-                                std::istream_iterator<pisa::io::Line>()).to_file(out_file);
-} 
+    pisa::encode_payload_vector(
+        std::istream_iterator<pisa::io::Line>(ifs), std::istream_iterator<pisa::io::Line>())
+        .to_file(out_file);
+}
 
-void _search(
+auto _search(
     std::string const& index_path,
     std::string const& encoding,
     std::vector<std::string> const& queries,
@@ -127,7 +127,9 @@ void _search(
     std::size_t k,
     std::optional<std::string> const& wand_data_path,
     bool wand_data_compessed,
-    std::optional<std::string> const& scorer)
+    std::optional<std::string> const& scorer,
+    std::string const& term_lexicon,
+    std::optional<std::string> const& stemmer) -> std::vector<std::vector<pypisa::QueryResult>>
 {
     if (!scorer) {
         throw std::invalid_argument("queries without scoring are not currently supported");
@@ -140,6 +142,19 @@ void _search(
         throw std::invalid_argument("invalid encoding: " + encoding);
     }
     auto proc = engine->processor(algorithm, ScorerParams(scorer.value()), k);
+
+    std::vector<::pisa::Query> parsed_queries;
+    auto parse_query = resolve_query_parser(parsed_queries, term_lexicon, std::nullopt, stemmer);
+    std::for_each(queries.begin(), queries.end(), parse_query);
+
+    std::vector<std::vector<pypisa::QueryResult>> results;
+    std::transform(
+        parsed_queries.begin(),
+        parsed_queries.end(),
+        std::back_inserter(results),
+        [&proc](auto&& query) { return proc(query); });
+
+    return results;
 }
 
 PYBIND11_MODULE(pypisa, m)
@@ -159,5 +174,7 @@ PYBIND11_MODULE(pypisa, m)
         py::arg("k"),
         py::arg("wand_data_path"),
         py::arg("wand_data_compessed"),
-        py::arg("scorer"));
+        py::arg("scorer"),
+        py::arg("term_lexicon"),
+        py::arg("stemmer"));
 }
